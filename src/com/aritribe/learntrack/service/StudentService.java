@@ -2,52 +2,45 @@ package com.aritribe.learntrack.service;
 
 import com.aritribe.learntrack.entity.Student;
 import com.aritribe.learntrack.exception.EntityNotFoudException;
+import com.aritribe.learntrack.repository.StudentRepository;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.aritribe.learntrack.util.IGenerator.getNextStudentId;
 
 public class StudentService {
 
-    static ArrayList<Student> students = new ArrayList<>();
+    StudentRepository studentRepository = new StudentRepository();
 
-    public static void addStudent(String firstName, String lastName, String email, String batch) {
+    public Student addStudent(String firstName, String lastName, String email, String batch) {
         Student newStudent = new Student(getNextStudentId(), firstName, lastName, email, batch, true);
-        students.add(newStudent);
-        System.out.println("Student added successfully: " + newStudent.getDisplayName());
+        studentRepository.addStudent(newStudent);
+        return newStudent;
     }
 
-    public static void viewAllStudents() {
-        if (students.isEmpty()) {
-            System.out.println("No students found.");
-        } else {
-            for (Student student : students) {
-                System.out.println(student.getDisplayName() + " - " + (student.isActive() ? "Active" : "Inactive"));
-            }
+    public List<Student> viewAllStudents() {
+        return studentRepository.getAllStudents();
+    }
+
+    public void deactivateStudent(int studentIdToDeactivate) throws EntityNotFoudException {
+        Student student = studentRepository.findStudentById(studentIdToDeactivate);
+        if (student != null) {
+            studentRepository.deactivateStudent(studentIdToDeactivate);
         }
-    }
-
-    public static void deactivateStudent(int studentIdToDeactivate) throws EntityNotFoudException {
-            for (Student student : students) {
-                if (student.getId() == studentIdToDeactivate) {
-                    student.setActive(false);
-                    System.out.println("Student with ID " + studentIdToDeactivate + " has been deactivated.");
-                    return;
-                } else {
-                    throw new EntityNotFoudException("Student with ID " + studentIdToDeactivate + " not found.");
-                }
-            }
-    }
-
-    public static void searchStudentById(int studentId) throws EntityNotFoudException {
-
-        for (Student student : students) {
-            if (student.getId() == studentId) {
-                System.out.println(student.getDisplayName() + " - " + (student.isActive() ? "Active" : "Inactive"));
-                return;
-            }
+        else{
+            throw new EntityNotFoudException("Student with ID " + studentIdToDeactivate + " not found.");
         }
-        throw new EntityNotFoudException("Student with ID " + studentId + " not found.");
 
+    }
+
+    public Student searchStudentById(int studentId) throws EntityNotFoudException {
+        Student student = studentRepository.findStudentById(studentId);
+        if(student != null) {
+            return student;
+        }
+        else {
+            throw new EntityNotFoudException("Student with ID " + studentId + " not found.");
+        }
     }
 }

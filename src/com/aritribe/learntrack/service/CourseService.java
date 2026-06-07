@@ -2,46 +2,35 @@ package com.aritribe.learntrack.service;
 
 import com.aritribe.learntrack.entity.Course;
 import com.aritribe.learntrack.exception.EntityNotFoudException;
+import com.aritribe.learntrack.repository.CourseRepository;
 import com.aritribe.learntrack.util.IGenerator;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class CourseService {
-    static ArrayList<Course> courses = new ArrayList<>();
-    public static void addCourse(String courseName, String courseDescription, int durationWeeks) {
+
+    CourseRepository courseRepository = new CourseRepository();
+
+    public void addCourse(String courseName, String courseDescription, int durationWeeks) {
         Course newCourse = new Course(IGenerator.getNextCourseId(),courseName, courseDescription, durationWeeks,true);
-        courses.add(newCourse);
-        System.out.println("Course added successfully: " + newCourse.getCourseName());
+        courseRepository.addCourse(newCourse);
     }
 
-    public static void viewAllCourses() {
-        if (courses.isEmpty()) {
-            System.out.println("No courses found.");
-        } else {
-            for (Course course : courses) {
-                System.out.println(course.getCourseName() + " - " + (course.isActive() ? "Active" : "Inactive"));
-            }
-        }
+    public List<Course> viewAllCourses() {
+        return courseRepository.getAllCourses();
     }
 
-    public static void toggleCourseStatus(int courseIdToToggle) throws EntityNotFoudException {
-            for (Course course : courses) {
-                if (course.getId() == courseIdToToggle) {
-                    course.setActive(!course.isActive());
-                    System.out.println("Course with ID " + courseIdToToggle + " is now " + (course.isActive() ? "Active" : "Inactive") + ".");
-                    return;
-                }
-            }
+    public void toggleCourseStatus(int courseIdToToggle) throws EntityNotFoudException {
+        Course course = courseRepository.findCourseById(courseIdToToggle);
+        if(course == null)
             throw new EntityNotFoudException("Course with ID " + courseIdToToggle + " not found.");
+        courseRepository.toggleCourseStatus(courseIdToToggle);
     }
-    public static void findCourseById(int courseId) throws EntityNotFoudException {
+    public Course findCourseById(int courseId) throws EntityNotFoudException {
 
-            for (Course course : courses) {
-                if (course.getId() == courseId) {
-                    System.out.println(course.getCourseName() + " - " + (course.isActive() ? "Active" : "Inactive"));
-                    return;
-                }
-            }
+        Course course = courseRepository.findCourseById(courseId);
+        if(course == null)
             throw new EntityNotFoudException("Course with ID " + courseId + " not found.");
+        return course;
     }
 }
